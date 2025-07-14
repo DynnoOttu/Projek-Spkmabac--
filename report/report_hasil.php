@@ -1,6 +1,5 @@
 <?php
 require_once('../includes/konek.php'); // koneksi ke DB
-require_once __DIR__ . '/../vendor/autoload.php'; // mPDF autoload
 
 $mpdf = new \Mpdf\Mpdf(['format' => 'A4']);
 ob_start(); // mulai buffer output
