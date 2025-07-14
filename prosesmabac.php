@@ -47,12 +47,11 @@ if (!$id_alternatif) {
 }
 
 saveNilaiKriteria($koneksi, $id_alternatif, [
-    1 => $ipk,
-    2 => $dokumen,
-    3 => $kk,
-    4 => $sbl,
-    5 => $penghasilan,
-    6 => $prestasi
+    3 => $ipk,
+    6 => $dokumen,
+    7 => $kk,
+    8 => $sbl,
+    9 => $prestasi
 ]);
 
 if (!prosesMABAC($koneksi, $id_alternatif)) {
@@ -104,101 +103,111 @@ function saveNilaiKriteria($koneksi, $id_alternatif, $kriteria_values)
 function prosesMABAC($koneksi, $id_filter = null)
 {
     try {
+        // Ambil data alternatif dan perhitungan
         $alternatif = [];
         $sql = "SELECT m.id_alternatif, m.nama, p.id_kriteria, p.nilai 
                 FROM alternatif m 
-                JOIN perhitungan p ON m.id_alternatif = p.id_alternatif";
-        if ($id_filter !== null) {
-            $sql .= " WHERE m.id_alternatif = " . intval($id_filter);
-        }
-        $sql .= " ORDER BY m.id_alternatif, p.id_kriteria";
-
+                JOIN perhitungan p ON m.id_alternatif = p.id_alternatif
+                ORDER BY m.id_alternatif, p.id_kriteria";
         $result = $koneksi->query($sql);
+
         while ($row = $result->fetch_assoc()) {
-            $id_kriteria = (int)$row['id_kriteria'];
-            $id_alt = $row['id_alternatif'];
-            if (!isset($alternatif[$id_alt]['nama'])) {
-                $alternatif[$id_alt]['nama'] = $row['nama'];
-            }
-            if ($id_kriteria >= 1 && $id_kriteria <= 6) {
-                $alternatif[$id_alt]['kriteria'][$id_kriteria] = $row['nilai'];
-            }
+            $id = (int)$row['id_alternatif'];
+            $kriteria = (int)$row['id_kriteria'];
+            $alternatif[$id]['nama'] = $row['nama'];
+            $alternatif[$id]['kriteria'][$kriteria] = (float)$row['nilai'];
         }
 
+        // Ambil bobot dan jenis
         $bobot = [];
-        $result = $koneksi->query("SELECT id_kriteria, bobot, jenis FROM kriteria ORDER BY id_kriteria");
-        while ($row = $result->fetch_assoc()) {
+        $res = $koneksi->query("SELECT id_kriteria, bobot, jenis FROM kriteria ORDER BY id_kriteria");
+        while ($row = $res->fetch_assoc()) {
             $bobot[$row['id_kriteria']] = [
-                'bobot' => $row['bobot'],
-                'jenis' => $row['jenis']
+                'bobot' => (float)$row['bobot'],
+                'jenis' => strtolower($row['jenis'])
             ];
         }
 
+        // Matriks X dan max/min
         $X = [];
         $max_min = [];
         foreach ($alternatif as $id => $data) {
-            foreach ($bobot as $kid => $b) {
-                $nilai = isset($data['kriteria'][$kid]) ? $data['kriteria'][$kid] : 0;
-                $X[$id][$kid] = $nilai;
-                if (!isset($max_min[$kid])) {
-                    $max_min[$kid] = ['max' => $nilai, 'min' => $nilai];
+            foreach ($bobot as $k => $_) {
+                $nilai = $data['kriteria'][$k] ?? 0;
+                $X[$id][$k] = $nilai;
+                if (!isset($max_min[$k])) {
+                    $max_min[$k] = ['max' => $nilai, 'min' => $nilai];
                 } else {
-                    $max_min[$kid]['max'] = max($max_min[$kid]['max'], $nilai);
-                    $max_min[$kid]['min'] = min($max_min[$kid]['min'], $nilai);
+                    $max_min[$k]['max'] = max($max_min[$k]['max'], $nilai);
+                    $max_min[$k]['min'] = min($max_min[$k]['min'], $nilai);
                 }
             }
         }
 
+        // Matriks N
         $N = [];
-        foreach ($X as $id => $kriteria_values) {
-            foreach ($kriteria_values as $kid => $nilai) {
-                $range = $max_min[$kid]['max'] - $max_min[$kid]['min'];
-                if ($range == 0) {
-                    $N[$id][$kid] = 1;
-                } else {
-                    $N[$id][$kid] = ($bobot[$kid]['jenis'] === 'benefit')
-                        ? ($nilai - $max_min[$kid]['min']) / $range
-                        : ($max_min[$kid]['max'] - $nilai) / $range;
-                }
+        foreach ($X as $id => $nilai_kriteria) {
+            foreach ($nilai_kriteria as $k => $v) {
+                $range = $max_min[$k]['max'] - $max_min[$k]['min'];
+                $N[$id][$k] = ($range == 0) ? 1 : (
+                    $bobot[$k]['jenis'] === 'benefit'
+                    ? ($v - $max_min[$k]['min']) / $range
+                    : ($max_min[$k]['max'] - $v) / $range
+                );
             }
         }
 
+        // Matriks V
         $V = [];
-        foreach ($N as $id => $kriteria_values) {
-            foreach ($kriteria_values as $kid => $val) {
-                $V[$id][$kid] = $bobot[$kid]['bobot'] * ($val + 1);
+        foreach ($N as $id => $nilai_kriteria) {
+            foreach ($nilai_kriteria as $k => $v) {
+                $V[$id][$k] = $bobot[$k]['bobot'] * ($v + 1);
             }
         }
 
+        // Titik batas G
         $G = [];
-        foreach (array_keys($bobot) as $kid) {
+        foreach ($bobot as $k => $_) {
             $product = 1;
             foreach ($V as $id => $vals) {
-                $product *= $vals[$kid];
+                $product *= $vals[$k];
             }
-            $G[$kid] = pow($product, 1 / count($V));
+            $G[$k] = pow($product, 1 / count($V));
         }
 
+        // Hitung skor akhir (S)
         $S = [];
         foreach ($V as $id => $vals) {
             $sum = 0;
-            foreach ($vals as $kid => $val) {
-                $sum += $val - $G[$kid];
+            foreach ($vals as $k => $val) {
+                $sum += $val - $G[$k];
             }
             $S[$id] = $sum;
         }
 
+        // Urutkan skor terbesar
         arsort($S);
-        $ranking = 1;
-        foreach ($S as $id => $skor) {
-            $rekomendasi = ($ranking <= 10) ? 'Direkomendasikan' : 'Tidak Direkomendasikan';
+
+        // Peringkat unik selalu naik
+        $peringkat = 1;
+        foreach ($S as $id => $score) {
+            if ($id_filter !== null && $id != $id_filter) {
+                continue;
+            }
+
+            $rekomendasi = ($peringkat <= 10) ? 'Direkomendasikan' : 'Tidak Direkomendasikan';
+
             $stmt = $koneksi->prepare("INSERT INTO hasil (id_alternatif, skor_akhir, peringkat, rekomendasi) 
                 VALUES (?, ?, ?, ?) 
-                ON DUPLICATE KEY UPDATE skor_akhir = VALUES(skor_akhir), peringkat = VALUES(peringkat), rekomendasi = VALUES(rekomendasi)");
-            $stmt->bind_param("idis", $id, $skor, $ranking, $rekomendasi);
+                ON DUPLICATE KEY UPDATE 
+                skor_akhir = VALUES(skor_akhir), 
+                peringkat = VALUES(peringkat), 
+                rekomendasi = VALUES(rekomendasi)");
+            $stmt->bind_param("idis", $id, $score, $peringkat, $rekomendasi);
             $stmt->execute();
             $stmt->close();
-            $ranking++;
+
+            $peringkat++; // SELALU naik meski skor sama
         }
 
         return true;

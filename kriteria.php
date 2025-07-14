@@ -2,12 +2,13 @@
 require_once('includes/init.php');
 $user_role = get_role();
 if (!in_array($user_role, ['admin', 'kasek', 'guru'])) {
-    header('Location: login.php');
-    exit;
+  header('Location: login.php');
+  exit;
 }
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Dashboard SPK</title>
@@ -15,7 +16,6 @@ if (!in_array($user_role, ['admin', 'kasek', 'guru'])) {
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
   <style>
-    
     body {
       margin: 0;
       padding: 0;
@@ -27,7 +27,7 @@ if (!in_array($user_role, ['admin', 'kasek', 'guru'])) {
 
     .sidebar {
       width: 250px;
-      background-color:rgb(39, 41, 33);
+      background-color: rgb(39, 41, 33);
       color: white;
       height: 100vh;
       position: fixed;
@@ -36,51 +36,52 @@ if (!in_array($user_role, ['admin', 'kasek', 'guru'])) {
     }
 
     .sidebar .nav-link {
-  padding: 12px 20px;
-  border-radius: 6px;
-  transition: background 0.2s, color 0.2s;
-}
-/*.warnaaa pada sidebar pilihan */
-.sidebar .nav-link:hover,
-.sidebar .nav-link.active {
-  background-color:rgb(5, 108, 212);
-  color: #fff;
-}
+      padding: 12px 20px;
+      border-radius: 6px;
+      transition: background 0.2s, color 0.2s;
+    }
 
-.sidebar .nav-link i {
-  font-size: 1.1rem;
-}
+    /*.warnaaa pada sidebar pilihan */
+    .sidebar .nav-link:hover,
+    .sidebar .nav-link.active {
+      background-color: rgb(5, 108, 212);
+      color: #fff;
+    }
 
-.sidebar .nav-item:last-child {
-  margin-top: auto;
-}
+    .sidebar .nav-link i {
+      font-size: 1.1rem;
+    }
+
+    .sidebar .nav-item:last-child {
+      margin-top: auto;
+    }
 
     .sidebar.collapsed {
       transform: translateX(-100%);
     }
 
     .sidebar a {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  color: white;
-  text-decoration: none;
-  width: 100%;
-  border-radius: 8px;
-  transition: background 0.3s;
-}
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      color: white;
+      text-decoration: none;
+      width: 100%;
+      border-radius: 8px;
+      transition: background 0.3s;
+    }
 
-.sidebar a:hover {
-  background-color: #495057;
-  text-decoration: none;
-}
+    .sidebar a:hover {
+      background-color: #495057;
+      text-decoration: none;
+    }
 
-.sidebar a i {
-  margin-right: 10px;
-  font-size: 1.2rem;
-}
+    .sidebar a i {
+      margin-right: 10px;
+      font-size: 1.2rem;
+    }
 
-/*.warnaaa pada backround */
+    /*.warnaaa pada backround */
     .content {
       margin-left: 250px;
       flex-grow: 1;
@@ -119,7 +120,7 @@ if (!in_array($user_role, ['admin', 'kasek', 'guru'])) {
       align-items: center;
       transition: 0.3s;
       font-weight: 600;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     .card-menu:hover {
@@ -145,50 +146,50 @@ if (!in_array($user_role, ['admin', 'kasek', 'guru'])) {
     }
 
     .dropdown-toggle::after {
-  display: none !important;
-}
-
+      display: none !important;
+    }
   </style>
 </head>
+
 <body>
 
-<?php include '../spkmabac/control/nav.php'?>
+  <?php include './control/nav.php' ?>
 
   <div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <!-- Tombol Tambah Data -->
-<button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalTambahKriteria">
-  <i class="bi bi-plus-lg"></i> Tambah Data
-</button>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <!-- Tombol Tambah Data -->
+      <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalTambahKriteria">
+        <i class="bi bi-plus-lg"></i> Tambah Data
+      </button>
 
-  </div>
+    </div>
 
-  <div class="card shadow-sm">
-    <div class="card-body table-responsive">
-      <table class="table table-bordered table-striped table-hover align-middle mb-0">
-        <thead class="table-light text-center">
-          <tr>
-            <th>No</th>
-            <th>Kode Kriteria</th>
-            <th>Nama Kriteria</th>
-            <th>Bobot</th>
-            <th>Jenis</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-        
-        <tbody>
-<?php
-$query = mysqli_query($koneksi, "SELECT * FROM kriteria");
-$no = 1;
-while($row = mysqli_fetch_assoc($query)) {
-  echo "<tr class='text-center'>";
-  echo "<td>" . $no++ . "</td>";
-  echo "<td>" . htmlspecialchars($row['kode']) . "</td>";
-  echo "<td>" . htmlspecialchars($row['nama']) . "</td>";
-  echo "<td>" . htmlspecialchars($row['bobot']) . "</td>";
-  echo "<td>" . htmlspecialchars($row['jenis']) . "</td>";
-  echo "<td>
+    <div class="card shadow-sm">
+      <div class="card-body table-responsive">
+        <table class="table table-bordered table-striped table-hover align-middle mb-0">
+          <thead class="table-light text-center">
+            <tr>
+              <th>No</th>
+              <th>Kode Kriteria</th>
+              <th>Nama Kriteria</th>
+              <th>Bobot</th>
+              <th>Jenis</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <?php
+            $query = mysqli_query($koneksi, "SELECT * FROM kriteria");
+            $no = 1;
+            while ($row = mysqli_fetch_assoc($query)) {
+              echo "<tr class='text-center'>";
+              echo "<td>" . $no++ . "</td>";
+              echo "<td>" . htmlspecialchars($row['kode']) . "</td>";
+              echo "<td>" . htmlspecialchars($row['nama']) . "</td>";
+              echo "<td>" . htmlspecialchars($row['bobot']) . "</td>";
+              echo "<td>" . htmlspecialchars($row['jenis']) . "</td>";
+              echo "<td>
           <button type='button' class='btn btn-warning btn-sm me-1' data-bs-toggle='modal' data-bs-target='#editModal{$row['id_kriteria']}'>
             <i class='bi bi-pencil-square'></i>
           </button>
@@ -196,10 +197,10 @@ while($row = mysqli_fetch_assoc($query)) {
             <i class='bi bi-trash'></i>
           </a>
         </td>";
-  echo "</tr>";
+              echo "</tr>";
 
-  // MODAL diletakkan di sini, setelah </tr>
-  echo "
+              // MODAL diletakkan di sini, setelah </tr>
+              echo "
   <div class='modal fade' id='editModal{$row['id_kriteria']}' tabindex='-1' aria-labelledby='editModalLabel{$row['id_kriteria']}' aria-hidden='true'>
     <div class='modal-dialog'>
       <div class='modal-content'>
@@ -239,25 +240,25 @@ while($row = mysqli_fetch_assoc($query)) {
     </div>
   </div>
   ";
-}
-?>
-</tbody>
+            }
+            ?>
+          </tbody>
 
-      </table>
+        </table>
+      </div>
     </div>
   </div>
-</div>
 
-  
-</div>
 
-<script>
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('collapsed');
-  document.getElementById('content').classList.toggle('collapsed');
-}
-</script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </div>
+
+  <script>
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+      document.getElementById('content').classList.toggle('collapsed');
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 
@@ -270,7 +271,7 @@ function toggleSidebar() {
           <h5 class="modal-title" id="modalTambahLabel"><i class="bi bi-plus-circle me-2"></i>Tambah Data Kriteria</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        
+
         <div class="modal-body">
           <div class="row mb-3">
             <div class="col-md-6">
@@ -298,7 +299,7 @@ function toggleSidebar() {
             </div>
           </div>
         </div>
-        
+
         <div class="modal-footer">
           <button type="reset" class="btn btn-secondary"><i class="bi bi-arrow-repeat"></i> Reset</button>
           <button type="submit" class="btn btn-primary"><i class="bi bi-save2"></i> Simpan</button>
@@ -317,7 +318,7 @@ function toggleSidebar() {
           <h5 class="modal-title" id="modalTambahLabel"><i class="bi bi-plus-circle me-2"></i>Tambah Data Kriteria</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        
+
         <div class="modal-body">
           <div class="row mb-3">
             <div class="col-md-6">
@@ -345,7 +346,7 @@ function toggleSidebar() {
             </div>
           </div>
         </div>
-        
+
         <div class="modal-footer">
           <button type="reset" class="btn btn-secondary"><i class="bi bi-arrow-repeat"></i> Reset</button>
           <button type="submit" class="btn btn-primary"><i class="bi bi-save2"></i> Simpan</button>
