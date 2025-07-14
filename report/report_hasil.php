@@ -1,10 +1,9 @@
 <?php
-require_once __DIR__ . '/../vendor/autoload.php'; // mPDF
 require_once('../includes/konek.php'); // koneksi ke DB
+require_once __DIR__ . '/../vendor/autoload.php'; // mPDF autoload
 
-$mpdf = new \Mpdf\Mpdf();
+$mpdf = new \Mpdf\Mpdf(['format' => 'A4']);
 ob_start(); // mulai buffer output
-
 ?>
 
 <h2 style="text-align:center;">LAPORAN HASIL PENILAIAN</h2>
@@ -68,19 +67,8 @@ ob_start(); // mulai buffer output
 <small>Dicetak pada: <?php echo date('d F Y, H:i:s'); ?> </small>
 
 <?php
-// Menyimpan isi buffer ke variabel dan mengakhiri buffer
-$html = ob_get_contents();
-ob_end_clean();
-
-// Memuat library mPDF
-require_once __DIR__ . '/../vendor/autoload.php';
-
-$mpdf = new \Mpdf\Mpdf(['format' => 'A4']);
-
-// Menambahkan konten HTML ke PDF
-$mpdf->WriteHTML(utf8_encode($html));
-
-// Output PDF ke browser
+$html = ob_get_clean(); // ambil output dan tutup buffer
+$mpdf->WriteHTML($html);
 $mpdf->Output('laporan_hasil.pdf', 'I');
 exit;
 ?>
