@@ -183,8 +183,8 @@ if (!in_array($user_role, ['admin', 'kasek', 'guru'])) {
           <i class="bi bi-person-circle fs-4 text-secondary"></i>
         </a>
         <ul class="dropdown-menu dropdown-menu-end text-small shadow" aria-labelledby="dropdownUser">
-          <li><a class="dropdown-item" href="profile.php"><i class="bi bi-person me-2"></i>Profil</a></li>
-          <li><a class="dropdown-item" href="logout.php"><i class="bi bi-box-arrow-right me-2"></i>Keluar</a></li>
+          <!-- <li><a class="dropdown-item" href="./profile.php"><i class="bi bi-person me-2"></i>Profil</a></li> -->
+          <li><a class="dropdown-item" href="./login.php"><i class="bi bi-box-arrow-right me-2"></i>Keluar</a></li>
         </ul>
       </div>
     </div>
