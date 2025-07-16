@@ -103,7 +103,7 @@ require_once('template/header.php');
     <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-fw fa-users-cog"></i> Data User</h1>
 
 	<a href="list-user.php" class="btn btn-secondary btn-icon-split"><span class="icon text-white-50"><i class="fas fa-arrow-left"></i></span>
-		<span class="text">Kembali</span>
+		<span class="text">back</span>
 	</a>
 </div>
 
