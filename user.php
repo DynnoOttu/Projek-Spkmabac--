@@ -202,46 +202,45 @@ if (!in_array($user_role, ['admin', 'kasek', 'guru'])) {
         </button>
       </div>
 
-      <div class="card shadow-sm rounded-4">
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-bordered table-hover">
-              <thead class="table-light text-center">
-                <tr>
-                  <th>No</th>
-                  <th>Nama</th>
-                  <th>Username</th>
-                  <th>Password</th>
-                  <th>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                <?php
-                $query = mysqli_query($koneksi, "SELECT * FROM admin");
-                $no = 1;
-                while ($row = mysqli_fetch_assoc($query)) {
-                  echo "<tr class='text-center'>";
-                  echo "<td>" . $no++ . "</td>";
-                  echo "<td>" . htmlspecialchars($row['nama']) . "</td>";
-                  echo "<td>" . htmlspecialchars($row['username']) . "</td>";
-                  echo "<td>" . htmlspecialchars($row['password']) . "</td>";
-                  echo "<td>
+    <div class="card shadow-sm rounded-4">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover">
+            <thead class="table-light text-center">
+              <tr>
+                <th>No</th>
+                <th>Nama</th>
+                <th>Username</th>
+                <th>Password</th>
+                <th>Aksi</th></tr>
+            </thead>
+            <tbody>
+              <?php
+              $query = mysqli_query($koneksi, "SELECT * FROM admin");
+              $no = 1;
+              while($row = mysqli_fetch_assoc($query)) {
+                echo "<tr class='text-center'>";
+                echo "<td>" . $no++ . "</td>";
+                echo "<td>" . htmlspecialchars($row['nama']) . "</td>";
+                echo "<td>" . htmlspecialchars($row['username']) . "</td>";
+                echo "<td>" . htmlspecialchars($row['password']) . "</td>";
+                echo "<td>
                 <button type='button' class='btn btn-warning btn-sm me-1' data-bs-toggle='modal' data-bs-target='#editModal{$row['id_admin']}'>
             <i class='bi bi-pencil-square'></i>
           </button>
-                        <a href='hapus_alternatif.php?id={$row['id_admin']}' class='btn btn-danger btn-sm' onclick='return confirm(\"Yakin ingin menghapus?\")'>
+                        <a href='hapus_user.php?id={$row['id_admin']}' class='btn btn-danger btn-sm' onclick='return confirm(\"Yakin ingin menghapus?\")'>
                           <i class='bi bi-trash'></i>
                         </a>
                       </td>";
-                  echo "</tr>";
-                }
-                ?>
-              </tbody>
-            </table>
-          </div>
+                echo "</tr>";
+              }
+              ?>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
+  </div>
 
     <!-- Modal Tambah User -->
     <div class="modal fade" id="modalTambahUser" tabindex="-1" aria-labelledby="modalTambahUserLabel" aria-hidden="true">

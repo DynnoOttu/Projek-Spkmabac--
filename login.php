@@ -52,7 +52,7 @@ endif;
     body {
       height: 100vh;
       margin: 0;
-      background: url('https://images.unsplash.com/photo-1588072432836-e10032774350') no-repeat center center fixed;
+      background: url('assets/img/Screenshot\ 2025-07-12\ 064442.png') no-repeat center center fixed;
       background-size: cover;
       display: flex;
       align-items: center;

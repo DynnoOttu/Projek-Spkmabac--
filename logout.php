@@ -14,7 +14,7 @@ session_unset();
 session_destroy();
 
 // mengalihkan halaman sambil mengirim pesan logout
-header("location:../spkmabac/login.php?pesan=logout");
+header("location:login.php?pesan=logout");
 ?>
 
 //Link untuk akses logout
