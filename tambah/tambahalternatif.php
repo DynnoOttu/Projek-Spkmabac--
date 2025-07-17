@@ -3,20 +3,17 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Pastikan path init.php benar
 require_once(dirname(__DIR__) . '/includes/init.php');
 
-// Pastikan hanya user yang memiliki hak akses tertentu yang bisa menambahkan data
 $user_role = get_role();
 if (!in_array($user_role, ['admin', 'kasek', 'guru'])) {
     header('Location: ../login.php');
     exit;
 }
 
-// Cek apakah form disubmit
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Validasi field yang diperlukan
-    $required_fields = ['kode', 'nama', 'univ', 'jenjang', 'fs', 'dk', 'ortu', 'nim'];
+    // Validasi field yang diperlukan (tanpa nim karena akan diisi default)
+    $required_fields = ['kode', 'nama', 'univ', 'jenjang', 'fs', 'dk', 'ortu'];
     $missing_fields = [];
 
     foreach ($required_fields as $field) {
@@ -30,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Ambil nilai dari form dengan escape
+    // Ambil nilai dari form
     $kode = mysqli_real_escape_string($koneksi, $_POST['kode']);
     $nama = mysqli_real_escape_string($koneksi, $_POST['nama']);
     $univ = mysqli_real_escape_string($koneksi, $_POST['univ']);
@@ -38,7 +35,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $fs = mysqli_real_escape_string($koneksi, $_POST['fs']);
     $dk = mysqli_real_escape_string($koneksi, $_POST['dk']);
     $ortu = mysqli_real_escape_string($koneksi, $_POST['ortu']);
-    $nim = mysqli_real_escape_string($koneksi, $_POST['nim']);
+
+    // Set nilai default untuk nim
+    $nim = '1';
 
     // Simpan ke database
     $query = "INSERT INTO alternatif (kode, nama, univ, jenjang, fs, dk, ortu, nim) 
@@ -46,7 +45,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $result = mysqli_query($koneksi, $query);
 
-    // Cek hasil insert
     if ($result) {
         header('Location: ../alternatif.php?status=success');
         exit;
@@ -57,7 +55,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 } else {
-    // Akses tidak valid
     header('Location: ../alternatif.php');
     exit;
 }
