@@ -354,7 +354,7 @@ if (!in_array($user_role, ['admin', 'kasek', 'guru'])) {
     <!-- Modal Tambah Alternatif -->
     <div class="modal fade" id="modalTambahAlternatif" tabindex="-1" aria-labelledby="modalTambahAlternatifLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg">
-        <form action="../tambah/tambahalternatif.php" method="post" class="modal-content rounded-3">
+        <form action="./tambah/tambahalternatif.php" method="post" class="modal-content rounded-3">
           <div class="modal-header bg-primary text-white">
             <h5 class="modal-title" id="modalTambahAlternatifLabel">
               <i class="bi bi-plus-circle me-2"></i>Tambah Data Alternatif
