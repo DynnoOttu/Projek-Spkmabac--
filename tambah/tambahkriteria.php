@@ -2,11 +2,11 @@
 require_once('../includes/init.php');
 
 // Pastikan hanya user yang memiliki hak akses tertentu yang bisa menambahkan data
-$user_role = get_role();
-if (!in_array($user_role, ['admin', 'kasek', 'guru'])) {
-    header('Location: login.php');
-    exit;
-}
+// $user_role = get_role();
+// if (!in_array($user_role, ['admin', 'kasek', 'guru'])) {
+//     header('Location: login.php');
+//     exit;
+// }
 
 // Cek apakah form disubmit
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -40,4 +40,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Location: kriteria.php');
     exit;
 }
-?>
