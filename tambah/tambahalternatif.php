@@ -17,11 +17,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $jenjang  = mysqli_real_escape_string($koneksi, $_POST['jenjang']);
     $fs  = mysqli_real_escape_string($koneksi, $_POST['fs']);
     $dk  = mysqli_real_escape_string($koneksi, $_POST['dk']);
+    $ortu  = mysqli_real_escape_string($koneksi, $_POST['ortu']);
 
     // Validasi sederhana
-    if (!empty($kode) && !empty($nama) && !empty($univ) && !empty($jenjang) && !empty($fs) && !empty($dk)) {
+    if (!empty($kode) && !empty($nama) && !empty($univ) && !empty($jenjang) && !empty($fs) && !empty($dk) && !empty($ortu)) {
         // Simpan ke database
-        $query = "INSERT INTO alternatif (kode, nama, univ, jenjang, fs, dk) VALUES ('$kode', '$nama', '$univ', '$jenjang', '$fs', '$dk')";
+        $query = "INSERT INTO alternatif (kode, nama, univ, jenjang, fs, dk, ortu) VALUES ('$kode', '$nama', '$univ', '$jenjang', '$fs', '$dk', '$ortu')";
         $result = mysqli_query($koneksi, $query);
 
         // Cek hasil insert

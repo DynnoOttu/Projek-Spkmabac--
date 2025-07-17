@@ -259,6 +259,7 @@ if (!in_array($user_role, ['admin', 'kasek', 'guru'])) {
                   <th>Jenjang</th>
                   <th>Fakultas/Semester</th>
                   <th>Desa/Kelurahan</th>
+                  <th>Orang Tua</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
@@ -281,6 +282,7 @@ if (!in_array($user_role, ['admin', 'kasek', 'guru'])) {
                   echo "<td>" . htmlspecialchars($row['jenjang']) . "</td>";
                   echo "<td>" . htmlspecialchars($row['fs']) . "</td>";
                   echo "<td>" . htmlspecialchars($row['dk']) . "</td>";
+                  echo "<td>" . htmlspecialchars($row['ortu']) . "</td>";
                   echo "<td>
           <button type='button' class='btn btn-warning btn-sm me-1' data-bs-toggle='modal' data-bs-target='#editModal{$row['id_alternatif']}'>
             <i class='bi bi-pencil-square'></i>
@@ -326,6 +328,10 @@ if (!in_array($user_role, ['admin', 'kasek', 'guru'])) {
             <div class='mb-3'>
               <label for='nama{$row['id_alternatif']}' class='form-label'>Desa/Kelurahan</label>
               <input type='text' class='form-control' id='dk{$row['id_alternatif']}' name='dk' value='{$row['dk']}' step='0.01' required>
+            </div>
+            <div class='mb-3'>
+              <label for='nama{$row['id_alternatif']}' class='form-label'>Orang Tua</label>
+              <input type='text' class='form-control' id='dk{$row['id_alternatif']}' name='ortu' value='{$row['ortu']}' step='0.01' required>
             </div>
           <div class='modal-footer'>
             <button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Batal</button>
@@ -380,6 +386,10 @@ if (!in_array($user_role, ['admin', 'kasek', 'guru'])) {
               <div class="col-md-6">
                 <label for="dk" class="form-label">Desa/kelurahan</label>
                 <input type="text" class="form-control" id="dk" name="dk" placeholder="" required>
+              </div>
+              <div class="col-md-6">
+                <label for="dk" class="form-label">Orang Tua</label>
+                <input type="text" class="form-control" id="ortu" name="ortu" placeholder="" required>
               </div>
             </div>
           </div>
