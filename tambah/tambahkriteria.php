@@ -1,70 +1,68 @@
 <?php
-require_once('../includes/init.php');
+// Enable full error reporting
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
 
-// Debug 1: Cek session dan role user
-var_dump('User Role:', get_role());
-var_dump('Session Data:', $_SESSION);
+try {
+    // Log that script started
+    error_log("tambahalternatif.php started execution");
 
-// Pastikan hanya user yang memiliki hak akses tertentu yang bisa menambahkan data
-$user_role = get_role();
-if (!in_array($user_role, ['admin', 'kasek', 'guru'])) {
-    var_dump('Akses ditolak. Role user:', $user_role);
-    header('Location: login.php');
-    exit;
-}
+    require_once('../includes/init.php');
+    error_log("init.php loaded successfully");
 
-// Debug 2: Cek method request
-var_dump('Request Method:', $_SERVER['REQUEST_METHOD']);
-var_dump('POST Data:', $_POST);
+    // Debug user role
+    $user_role = get_role();
+    error_log("User role: " . $user_role);
 
-// Cek apakah form disubmit
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Debug 3: Cek koneksi database
-    var_dump('Koneksi Database:', $koneksi);
-
-    if (!$koneksi) {
-        die('Koneksi database gagal: ' . mysqli_connect_error());
+    if (!in_array($user_role, ['admin', 'kasek', 'guru'])) {
+        error_log("Access denied for role: " . $user_role);
+        header('Location: login.php');
+        exit;
     }
 
-    // Ambil nilai dari form
-    $kode = isset($_POST['kode']) ? mysqli_real_escape_string($koneksi, $_POST['kode']) : '';
-    $nama = isset($_POST['nama']) ? mysqli_real_escape_string($koneksi, $_POST['nama']) : '';
-    $bobot = isset($_POST['bobot']) ? mysqli_real_escape_string($koneksi, $_POST['bobot']) : '';
-    $jenis = isset($_POST['jenis']) ? mysqli_real_escape_string($koneksi, $_POST['jenis']) : '';
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        error_log("POST request received");
 
-    // Debug 4: Cek data yang akan diinsert
-    var_dump('Data sebelum insert:', $kode, $nama, $bobot, $jenis);
+        // Verify database connection
+        if (!$koneksi) {
+            throw new Exception("Database connection failed: " . mysqli_connect_error());
+        }
 
-    // Validasi sederhana
-    if (!empty($kode) && !empty($nama) && !empty($bobot) && !empty($jenis)) {
-        // Simpan ke database
-        $query = "INSERT INTO kriteria (kode, nama, bobot, jenis) VALUES ('$kode', '$nama','$bobot','$jenis')";
+        // Get form data with validation
+        $required = ['kode', 'nama', 'bobot', 'jenis'];
+        $missing = array_diff($required, array_keys($_POST));
 
-        // Debug 5: Tampilkan query SQL
-        var_dump('Query SQL:', $query);
+        if (!empty($missing)) {
+            throw new Exception("Missing fields: " . implode(', ', $missing));
+        }
+
+        // Sanitize inputs
+        $kode = mysqli_real_escape_string($koneksi, $_POST['kode']);
+        $nama = mysqli_real_escape_string($koneksi, $_POST['nama']);
+        $bobot = mysqli_real_escape_string($koneksi, $_POST['bobot']);
+        $jenis = mysqli_real_escape_string($koneksi, $_POST['jenis']);
+
+        // Build and execute query
+        $query = "INSERT INTO kriteria (kode, nama, bobot, jenis) VALUES ('$kode', '$nama', '$bobot', '$jenis')";
+        error_log("Executing query: " . $query);
 
         $result = mysqli_query($koneksi, $query);
 
-        // Debug 6: Cek hasil query
-        if ($result) {
-            var_dump('Insert berhasil');
-            header('Location: ../kriteria.php?status=success');
-            exit;
-        } else {
-            // Debug 7: Tampilkan error MySQL
-            var_dump('Error MySQL:', mysqli_error($koneksi));
-            header('Location: ../kriteria.php?status=error');
-            exit;
+        if (!$result) {
+            throw new Exception("Query failed: " . mysqli_error($koneksi));
         }
+
+        error_log("Insert successful");
+        header('Location: ../kriteria.php?status=success');
+        exit;
     } else {
-        // Debug 8: Data tidak lengkap
-        var_dump('Data tidak lengkap:', empty($kode), empty($nama), empty($bobot), empty($jenis));
-        header('Location: ../kriteria.php?status=invalid');
+        error_log("Invalid access method: " . $_SERVER['REQUEST_METHOD']);
+        header('Location: kriteria.php');
         exit;
     }
-} else {
-    // Debug 9: Akses tidak valid
-    var_dump('Akses langsung ke script tanpa POST');
-    header('Location: kriteria.php');
-    exit;
+} catch (Exception $e) {
+    error_log("ERROR: " . $e->getMessage());
+    // Display error message for debugging (remove in production)
+    die("Error: " . $e->getMessage());
 }
