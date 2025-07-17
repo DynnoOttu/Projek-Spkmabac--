@@ -1,68 +1,85 @@
 <?php
-// Enable full error reporting
+// Aktifkan error reporting untuk debugging
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
 
-try {
-    // Log that script started
-    error_log("tambahalternatif.php started execution");
+// Pastikan path init.php benar
+$init_path = dirname(__DIR__) . '/includes/init.php';
+if (!file_exists($init_path)) {
+    die("File init.php tidak ditemukan di: " . $init_path);
+}
+require_once($init_path);
 
-    require_once('../includes/init.php');
-    error_log("init.php loaded successfully");
+// Debug: Cek session dan role
+session_start();
+if (!isset($_SESSION['username'])) {
+    header('Location: ../login.php');
+    exit;
+}
 
-    // Debug user role
-    $user_role = get_role();
-    error_log("User role: " . $user_role);
+// Pastikan hanya user yang memiliki hak akses tertentu yang bisa menambahkan data
+if (!function_exists('get_role')) {
+    die("Fungsi get_role() tidak ditemukan");
+}
 
-    if (!in_array($user_role, ['admin', 'kasek', 'guru'])) {
-        error_log("Access denied for role: " . $user_role);
-        header('Location: login.php');
+$user_role = get_role();
+$allowed_roles = ['admin', 'kasek', 'guru'];
+
+if (!in_array($user_role, $allowed_roles)) {
+    header('Location: ../login.php');
+    exit;
+}
+
+// Cek apakah form disubmit
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Validasi field yang diperlukan
+    $required_fields = ['kode', 'nama', 'univ', 'jenjang', 'fs', 'dk', 'ortu'];
+    $missing_fields = array();
+
+    foreach ($required_fields as $field) {
+        if (empty($_POST[$field])) {
+            $missing_fields[] = $field;
+        }
+    }
+
+    if (!empty($missing_fields)) {
+        header('Location: ../alternatif.php?status=invalid&missing=' . urlencode(implode(',', $missing_fields)));
         exit;
     }
 
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        error_log("POST request received");
+    // Pastikan koneksi database ada
+    if (!isset($koneksi) || !($koneksi instanceof mysqli)) {
+        die("Koneksi database tidak valid");
+    }
 
-        // Verify database connection
-        if (!$koneksi) {
-            throw new Exception("Database connection failed: " . mysqli_connect_error());
-        }
+    // Ambil nilai dari form dengan escape
+    $kode = mysqli_real_escape_string($koneksi, $_POST['kode']);
+    $nama = mysqli_real_escape_string($koneksi, $_POST['nama']);
+    $univ = mysqli_real_escape_string($koneksi, $_POST['univ']);
+    $jenjang = mysqli_real_escape_string($koneksi, $_POST['jenjang']);
+    $fs = mysqli_real_escape_string($koneksi, $_POST['fs']);
+    $dk = mysqli_real_escape_string($koneksi, $_POST['dk']);
+    $ortu = mysqli_real_escape_string($koneksi, $_POST['ortu']);
 
-        // Get form data with validation
-        $required = ['kode', 'nama', 'bobot', 'jenis'];
-        $missing = array_diff($required, array_keys($_POST));
+    // Simpan ke database
+    $query = "INSERT INTO alternatif (kode, nama, univ, jenjang, fs, dk, ortu) 
+              VALUES ('$kode', '$nama', '$univ', '$jenjang', '$fs', '$dk', '$ortu')";
 
-        if (!empty($missing)) {
-            throw new Exception("Missing fields: " . implode(', ', $missing));
-        }
+    $result = mysqli_query($koneksi, $query);
 
-        // Sanitize inputs
-        $kode = mysqli_real_escape_string($koneksi, $_POST['kode']);
-        $nama = mysqli_real_escape_string($koneksi, $_POST['nama']);
-        $bobot = mysqli_real_escape_string($koneksi, $_POST['bobot']);
-        $jenis = mysqli_real_escape_string($koneksi, $_POST['jenis']);
-
-        // Build and execute query
-        $query = "INSERT INTO kriteria (kode, nama, bobot, jenis) VALUES ('$kode', '$nama', '$bobot', '$jenis')";
-        error_log("Executing query: " . $query);
-
-        $result = mysqli_query($koneksi, $query);
-
-        if (!$result) {
-            throw new Exception("Query failed: " . mysqli_error($koneksi));
-        }
-
-        error_log("Insert successful");
-        header('Location: ../kriteria.php?status=success');
+    // Cek hasil insert
+    if ($result) {
+        header('Location: ../alternatif.php?status=success');
         exit;
     } else {
-        error_log("Invalid access method: " . $_SERVER['REQUEST_METHOD']);
-        header('Location: kriteria.php');
+        // Tampilkan error SQL untuk debugging
+        $error_msg = "Error: " . mysqli_error($koneksi);
+        error_log($error_msg);
+        header('Location: ../alternatif.php?status=error&msg=' . urlencode($error_msg));
         exit;
     }
-} catch (Exception $e) {
-    error_log("ERROR: " . $e->getMessage());
-    // Display error message for debugging (remove in production)
-    die("Error: " . $e->getMessage());
+} else {
+    // Akses tidak valid
+    header('Location: ../alternatif.php');
+    exit;
 }
